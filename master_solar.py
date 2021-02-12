@@ -9,7 +9,7 @@ import os.path
 # a_path = '/Users/davidramsey/Documents/jeopardy_starting/coding/solar/Oct_Meter_Readings_test'
 
 import connect_csvs_function
-
+import find_all_column_names_function
 
 
 # file_list = os.listdir("jsons")
@@ -27,33 +27,53 @@ file_list = os.listdir(dr_name)
 
 
 old_cols = []
-col_diff = []
-csv_count = 1
+all_cols = []
+new_cols = []
 
-##  Left off Thursday: how can I compare the colums to make sure they match?
-#mostly, how can I keep the variable old_cols moving throug the for loop.
+## get list all column names used in all these csvs
 
-
+#start counter loop for cols list:
+counter = 0
 
 for file in file_list:
     #open a specific a specific file from this dir and do you work to each one
     name_of_file = file
     with open(os.path.join(dr_name,file), mode = 'r') as src_file:
-        old_cols = connect_csvs_function.clean_solar_data(src_file, dr_name, name_of_file, old_cols, col_diff, csv_count )
+        old_cols = find_all_column_names_function.find_col_names(src_file, dr_name, name_of_file, old_cols)
+        
+        
+        #loop through to see if any column names match your columnnames list:
+        if counter > 0:
+            for col in old_cols:
+                if col not in all_cols:
+                    # if not in the list then add to empty list
+                    new_cols.append(col)
+            #add new list to all list
+            all_cols.extend(new_cols)
+            new_cols = [] #reset new list to be empty
 
-        print(file)
+        else:
+            all_cols = old_cols
+            counter += 1
+            
+        print(file + str(': columns scraped')
+        
         src_file.close()
-        csv_count += 1
+
+
+print(all_cols)    
+
+## for cleaning and wrangling data
+for file in file_list:
+    #open a specific a specific file from this dir and do you work to each one
+    name_of_file = file
+    with open(os.path.join(dr_name,file), mode = 'r') as src_file:
+        old_cols = connect_csvs_function.clean_solar_data(src_file, dr_name, name_of_file, old_cols)
+        
+                    
+        print(file + str(' is cleaned and wrangled'))
+        
+        src_file.close()
     
+
     
-    #clean the file up by running your solar_data_cleaner
-    #close the file 
-    #append it to the last file
-
-
-# without_extra_slash = os.path.normpath(a_path)
-
-# print(a_path)
-# last_part = os.path.basename(without_extra_slash)
-
-# print(last_part)
