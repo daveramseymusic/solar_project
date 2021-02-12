@@ -56,21 +56,23 @@ for file in file_list:
             all_cols = old_cols
             counter += 1
             
-        print(file + str(': columns scraped')
+        print(file + str(': columns scraped'))
         
         src_file.close()
 
 
 print(all_cols)    
 
+old_column_length = 20
 ## for cleaning and wrangling data
 for file in file_list:
     #open a specific a specific file from this dir and do you work to each one
     name_of_file = file
     with open(os.path.join(dr_name,file), mode = 'r') as src_file:
-        old_cols = connect_csvs_function.clean_solar_data(src_file, dr_name, name_of_file, old_cols)
-        
-                    
+        column_length = connect_csvs_function.clean_solar_data(src_file, dr_name, name_of_file, old_cols, all_cols)
+        if column_length != old_column_length:
+            print('columns not the same lenght!! !!!!!!')
+        old_column_length = column_length            
         print(file + str(' is cleaned and wrangled'))
         
         src_file.close()

@@ -48,7 +48,13 @@ def find_col_names(csv_filenames, concated_csv_file_base_path, name_of_file, old
             if 'date' in words:
                 datelike_headers_list.append(words)
     
+    
+    datelike_header = datelike_headers_list[0]
+    cols3 = csv_file.columns
+    cols3 = cols3.str.replace(datelike_header,'date_cleaned')
+    csv_file.columns = cols3
     old_cols = csv_file.columns
+    
     return list(old_cols)
 
 

@@ -11,7 +11,7 @@ them once they have been converted to csv from xlsx.'''
 # csv_filenames = '/Users/davidramsey/Documents/coding/solar/Oct_Meter_Readings_test/May 2020-Table 1.csv'
 # concated_csv_file_base_path = '/Users/davidramsey/Documents/coding/learning folder'
 
-def clean_solar_data(csv_filenames, concated_csv_file_base_path, name_of_file, old_cols):
+def clean_solar_data(csv_filenames, concated_csv_file_base_path, name_of_file, old_cols, all_cols):
 
     # 1. find what these squares actually have and save it as a variable
     # visits = pd.read_csv('visits.csv', parse_dates=[1])
@@ -30,6 +30,7 @@ def clean_solar_data(csv_filenames, concated_csv_file_base_path, name_of_file, o
     
     csv_file.columns = cols
     datelike_headers_list = []
+    
     
     for words in cols:
         if 'date' in words:
@@ -50,9 +51,27 @@ def clean_solar_data(csv_filenames, concated_csv_file_base_path, name_of_file, o
     
     #make date_like_headers_list singlular instead of a list
     datelike_header = datelike_headers_list[0]
-  
+    cols3 = csv_file.columns
+    cols3 = cols3.str.replace(datelike_header,'date_cleaned')
+    csv_file.columns = cols3
+
+    #just make datelike_header  be date_cleaned for now...
+    datelike_header = 'date_cleaned'
     
+    
+    '''if any columns are missing from all_cols, create an empty col 
+    so that all csvs have the same col_names'''
+   
+    for i in all_cols:
+        if i not in cols3:
+            csv_file[i] = ''
+    
+
+    #create a list col_names that are not the datetime names
     cols2 = csv_file.columns.drop(datelike_header)
+
+
+    #force all other columns than 1st column to be numeric
     csv_file[cols2] = csv_file[cols2].apply(pd.to_numeric, errors='coerce')
 
 
@@ -77,27 +96,38 @@ def clean_solar_data(csv_filenames, concated_csv_file_base_path, name_of_file, o
     # filter out all rows with more than 3 na's
     csv_file.dropna(thresh=10, inplace=True)
     csv_file.reset_index(drop=True, inplace=True)
-    #filter out all rows that have nothin in the first column:
 
 
+    #put all files in order
+    csv_file = csv_file.reindex(columns=all_cols)
+
+    column_length = len(csv_file.columns)
+
+    cols4 = list(csv_file.columns)
+    if cols4 != all_cols:
+        print('these columns are fucked')
+        print([x for x in all_cols if x not in cols4])
+            
+
+    #add start date columns
     csv_file['period_start_date'] = csv_file[datelike_header].min()
     csv_file['period_end_date'] = csv_file[datelike_header].max()
     
     
+    
+    
     #save newly cleaned file under different name
+    
     cleaned_file = csv_file 
+    
+    
+    column_length = len(cleaned_file.columns)
 
     #use .to_csv() to save as a csv
     #data_xls.to_csv('csvfile.csv', encoding='utf-8')
     cleaned_file.to_csv(str('cln_') + name_of_file, index=False , encoding='utf-8')
-    
 
-    # save cleaned column headers and returnd
-    old_cols = cleaned_file.columns
-    # turn the columns index into a list
-    # old_cols.tolist()
-
-    return list(old_cols)
+    return column_length
 
 
 
